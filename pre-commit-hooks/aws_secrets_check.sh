@@ -1,0 +1,22 @@
+#!/bin/bash
+
+ACCOUNT_REGEX='[0-9]{12}'
+ACCESS_KEY_REGEX='[A-Z0-9]{16,}'
+SECRET_KEY_REGEX='[A-Za-z0-9/+=]{40}'
+
+for FILE in $(git diff --cached --name-only); do
+  if grep -E "$ACCOUNT_REGEX" $FILE; then
+    echo "Potential AWS Account Number found in $FILE"
+    exit 1
+  fi
+  if grep -E "$ACCESS_KEY_REGEX" $FILE; then
+    echo "Potential AWS Access Key ID found in $FILE"
+    exit 1
+  fi
+  if grep -E "$SECRET_KEY_REGEX" $FILE; then
+    echo "Potential AWS Secret Access Key found in $FILE"
+    exit 1
+  fi
+done
+
+exit 0

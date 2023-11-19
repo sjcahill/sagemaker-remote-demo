@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: aws-secrets-check
+        name: AWS Secrets Check
+        entry: pre-commit-hooks/aws_secrets_check.sh
+        language: script
+        types: [file]
+        files: '(\.ts|\.json|\.js)$'
