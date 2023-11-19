@@ -172,5 +172,6 @@ yarn.lock
 .cdk.staging
 cdk.out
 
-# Misc
+# Random stuff
+scrap
 scrap.txt
