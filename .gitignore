@@ -171,3 +171,7 @@ package-lock.json
 yarn.lock
 .cdk.staging
 cdk.out
+
+# Random stuff
+scrap
+scrap.txt

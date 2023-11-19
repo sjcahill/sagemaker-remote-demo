@@ -6,4 +6,4 @@ repos:
         entry: pre-commit-hooks/aws_secrets_check.sh
         language: script
         types: [file]
-        files: '(\.ts|\.json|\.js)$'
+        files: '(\.ts|\.json|\.js\.txt)$'
