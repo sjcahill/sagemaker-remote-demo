@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-
 # This assumes you have a private ECR repository called `sagemaker-custom-images`
 repo_name="sagemaker-custom-images"
 image_name="sagemaker-image"

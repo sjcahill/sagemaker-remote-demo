@@ -27,18 +27,29 @@ The order in which to deploy stacks should generally be as follows:
 3. Sagemaker Role Stack
 4. Sagemaker Studio Stack
 
-Tearing down should be in reverse order and there are some considerations you must keep in mind to allow for a smooth
-teardown process
+Tearing down can always be a bit of a tricky process because of stack and infrastructure dependencies, but here is a
+general guideline
 
 1. Ensure all Sagemaker Studio apps (kgw and default) are deleted
 2. Ensure your sagemaker user is deleted (active apps prevent deletion)
 3. Delete the Studio Stack
 4. Delete the Ssm stack
 5. Delete the Sagemaker Role Stack
+6. Delete the Network Stack (see below)
 
 The network stack is the most difficult to teardown because of EFS and some security group rules
 
-1. Ensure that all EFS directories are deleted (these get created automatically for Sagemaker Studio)
+1. Ensure that all EFS volumes are deleted (these get created automatically for Sagemaker Studio)
     - You will lose all data on these so in production environments this warrants more careful considerations
     - Find the security groups associated with the VPC created in the network stack and delete all the rules for them
 2. You should now be able to delete the network stack
+
+## Getting Started
+
+Assuming you have succes
+
+## Lifeycle Config Custom Resource
+
+Word of warning: You will need to ensure that you are preserving certain configurations like `defaultResourceSpec` when
+making update_domain calls. The code we have hear assumes that we have no configuration aside from our lifecycle
+configs!
