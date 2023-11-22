@@ -7,6 +7,7 @@ import { SagemakerStack } from '../lib/sagemaker/sagemaker-stack';
 import { SagemakerRoleStack } from '../lib/iam/sagemaker-role-stack';
 import { IamSsmStack } from '../lib/iam/ssm-stack';
 
+// Comment for commit
 const app = new App();
 
 const cidr = IpAddresses.cidr('10.16.0.0/16');
