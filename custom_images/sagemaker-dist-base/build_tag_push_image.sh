@@ -22,8 +22,8 @@ echo "Your account number is ${account}"
 
 aws ecr get-login-password --region us-east-1 --profile "${profile}" | docker login --username AWS --password-stdin ${account}.dkr.ecr.us-east-1.amazonaws.com
 
-docker build -t ${sagemaker_image}:latest .
+docker build -t ${image_name}:latest .
 
-docker tag ${sagemaker_image}:latest ${account}.dkr.ecr.us-east-1.amazonaws.com/${repo_name}:my-sagemaker-image   
+docker tag ${image_name}:latest ${account}.dkr.ecr.us-east-1.amazonaws.com/${repo_name}:my-sagemaker-image   
 
 docker push ${account}.dkr.ecr.us-east-1.amazonaws.com/${repo_name}:my-sagemaker-image
