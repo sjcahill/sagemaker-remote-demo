@@ -52,7 +52,7 @@ so we can use it as a custom image in Sagemaker Studio
 
 ### Some Follow-up Actions once stacks are deployed
 
-1. Enabling setSourceIdentity for the Sagemaker Studio Domain
+#### (Optional) Enabling setSourceIdentity for the Sagemaker Studio Domain
 
 A good setting to enable for the Sagemaker Studio Domain is
 [setSourceIdentity](https://docs.aws.amazon.com/sagemaker/latest/dg/monitor-user-access.html). This will enable you to
@@ -66,7 +66,7 @@ cli (you could also make a lamdba or some more automated process as well)
 
 `aws sagemaker update-domain --domain-id [DOMAIN_ID] --domain-settings-for-update "ExecutionRoleIdentityConfig=USER_PROFILE_NAME" --profile [PROFILE_NAME] --region [REGION]`
 
-2. Building and Creating a Sagemaker Custom Image with `sagemaker-ssh-helper` package installed.
+#### Building and Creating a Sagemaker Custom Image with `sagemaker-ssh-helper` package installed.
 
 There are two ways you can do this:
 
@@ -75,7 +75,7 @@ There are two ways you can do this:
 
 Either way, you will need to have the `EcrRepo` stack deployed to create a private ECR repo (or create one via console)
 
-#### Via the shell script
+##### Via the shell script
 
 `custom_images/python-base` contains a Dockerfile that builds a relatively slim container based on `python:3.11.1`. We
 can create a custom image that can be selected inside Sagemaker Studio using this.
@@ -84,7 +84,7 @@ If you elect to use `build_tag_push_image.sh` then it should be as simple as ens
 `./build_tag_push_image.sh --profile <profile_name>`. This will deploy the image to ECR and create and attach the custom
 image to your Studio Domain.
 
-#### Via the console
+##### Via the console
 
 **NOTE** In order for the custom image to show up in the list of images in Studio we must add it to the environment
 settings for the domain prior to starting Studio or while it is shut down
@@ -93,7 +93,7 @@ Once we have our image in the ECR repo for the account we can create a Sagemaker
 
 Navigate to the `Images` tab in the left ribbon of Sagemaker Console UI
 
-![Custom Image UI](assets/custom-image-console-ui.png 'Custom Image UI')
+![Custom Image UI](assets/custom-image-ui.png 'Custom Image UI')
 
 Click on create Image and then paste in the ECR image URI for the image we pushed previously.
 
@@ -120,7 +120,7 @@ Click on `Attach Image` and select `Existing Image`. You should see your image h
 Hitting next will bring up the familiar `Image Properties` config options and use the same as we did above for UID/GUID
 etc
 
-4. Adding a Sagemaker User
+#### Adding a Sagemaker User
 
 Now that we have attached our custom image to the domain we can create a user.
 
@@ -130,7 +130,7 @@ selected.
 
 We don't need to use any of the optional settings (such as enabling canvas) for the user.
 
-5. Starting Studio and Creating a Notebook with our custom Image
+#### Starting Studio and Creating a Notebook with our custom Image
 
 Once you have successfully launch Sagemaker Studio you will be brought to the home screen.
 
@@ -163,7 +163,7 @@ instance in the instance below
 
 ![Advanced Tier Settings](assets/advanced-tier-settings.png 'Advanced Tier Settings')
 
-6. Using local VS Code Client to connect to Sagemaker Studio
+#### Using local VS Code Client to connect to Sagemaker Studio
 
 Everything is ready for us to remote into our Sagemaker Studio instance at this point and we just need to do some final
 configuration locally
