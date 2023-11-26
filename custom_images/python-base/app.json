@@ -1,0 +1,1 @@
+{ "AppImageConfigName": "sagemaker-slim-image-config", "KernelGatewayImageConfig": { "KernelSpecs": [ { "Name": "python3", "DisplayName": "python3" } ], "FileSystemConfig": { "MountPath": "/root", "DefaultUid": 0, "DefaultGid": 0 } } }

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import { App } from 'aws-cdk-lib';
+import { DeveloperRoleStack } from '../lib/iam/developer-role-stack';
 import { IpAddresses } from 'aws-cdk-lib/aws-ec2';
-import { Aws } from 'aws-cdk-lib';
 import { NetworkStack } from '../lib/network/network-stack';
 import { SagemakerStack } from '../lib/sagemaker/sagemaker-stack';
 import { SagemakerRoleStack } from '../lib/iam/sagemaker-role-stack';
-import { IamSsmStack } from '../lib/iam/ssm-stack';
+import { EcrStack } from '../lib/ecr/ecr-stack';
 
 const app = new App();
 
@@ -34,6 +34,7 @@ const networkProps = {
 const networkStack = new NetworkStack(app, 'NetworkStack', networkProps);
 const vpc = networkStack.vpc;
 
-const iamSsmStack = new IamSsmStack(app, 'IamSsmStack', stackProps);
+const developerRoleStack = new DeveloperRoleStack(app, 'DeveloperRoleStack', stackProps);
+const ecrStack = new EcrStack(app, 'EcrStack', stackProps);
 const sagemakerRoleStack = new SagemakerRoleStack(app, 'SagemakerRoleStack', stackProps);
 const sagemakerStack = new SagemakerStack(app, 'SagemakerStack', { ...stackProps, vpc });

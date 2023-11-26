@@ -3,6 +3,7 @@ import { CfnOutput, Fn, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Connections, Peer, Port, SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Code, Repository } from 'aws-cdk-lib/aws-codecommit';
+import { Role } from 'aws-cdk-lib/aws-iam';
 import * as path from 'path';
 
 export interface SagemakerStackProps extends StackProps {
@@ -13,10 +14,7 @@ export class SagemakerStack extends Stack {
     constructor(scope: Construct, id: string, props: SagemakerStackProps) {
         super(scope, id, props);
 
-        const sagemakerRoleArn = Fn.importValue('sagemakerRoleArn');
-        // const noIgVpc = Vpc.fromLookup(this, "importedNoIgVpc", {
-        //   tags: { Name: "noIgVpc" },
-        // });
+        const sagemakerRoleArn = Role.fromRoleName(this, 'sagemakerRole', 'defaultSagemakerRole').roleArn;
         const noIgVpc = props.vpc;
         const privateSubnetIds = noIgVpc.isolatedSubnets.map((subnet) => subnet.subnetId);
         const interfaceSgId = Fn.importValue('interfaceSecurityGroupId');
