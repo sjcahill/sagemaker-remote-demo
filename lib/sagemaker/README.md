@@ -4,9 +4,10 @@
 
 [Monitor User Access in Sagemaker](https://docs.aws.amazon.com/sagemaker/latest/dg/monitor-user-access.html)
 
-By default, the abillity to propagate the user profile name as the `sourceIdentity` in Studio is off.
+By default, the ability to propagate the user profile name as the `sourceIdentity` in Studio is off.
 
-To enable this feature you can use the aws cli to update the domain (there must be no active users in the domain).
+To enable this feature you can use the aws cli to update the domain (there must be no active user profiles in the
+domain, might need to delete any that exist).
 
 With this setting turned on, you can then use Cloudtrail to monitor and record user activities and get activities
 related to a specific user profile.

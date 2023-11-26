@@ -7,14 +7,13 @@ import {
     Role,
     ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { Aws, CfnOutput, Fn, Stack, StackProps } from 'aws-cdk-lib';
+import { Aws, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { SshPolicyStack } from './policies';
 
 export class SagemakerRoleStack extends Stack {
     constructor(scope: Construct, id: string, props: StackProps) {
         super(scope, id, props);
-
-        const sshServerPolicyArn = Fn.importValue('sshServerPolicyArn');
 
         const defaultSagemakerRole = new Role(this, 'defaultSagemakerRole', {
             roleName: 'defaultSagemakerRole',
@@ -42,9 +41,10 @@ export class SagemakerRoleStack extends Stack {
         );
 
         defaultSagemakerRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonSagemakerFullAccess'));
-        defaultSagemakerRole.addManagedPolicy(
-            ManagedPolicy.fromManagedPolicyArn(this, 'sshServerPolicyArn', sshServerPolicyArn),
-        );
+
+        SshPolicyStack.sshSagemakerServerPolicy(defaultSagemakerRole.roleArn).forEach((policy_statment) => {
+            defaultSagemakerRole.addToPolicy(policy_statment);
+        });
 
         defaultSagemakerRole.addToPolicy(
             new PolicyStatement({
@@ -66,10 +66,5 @@ export class SagemakerRoleStack extends Stack {
                 },
             }),
         );
-
-        new CfnOutput(this, 'sagemakerRoleArn', {
-            value: defaultSagemakerRole.roleArn,
-            exportName: 'sagemakerRoleArn',
-        });
     }
 }

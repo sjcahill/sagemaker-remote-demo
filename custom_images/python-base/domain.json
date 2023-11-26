@@ -1,0 +1,1 @@
+{ "DomainId": "d-degalyrxpbil", "DefaultUserSettings": { "KernelGatewayAppSettings": { "CustomImages": [ { "ImageName": "sagemaker-slim-image", "AppImageConfigName": "sagemaker-slim-image-config" } ] } } }
