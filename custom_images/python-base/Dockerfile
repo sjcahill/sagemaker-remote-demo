@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 RUN mkdir -p /etc/amazon/ssm
 COPY seelog.xml /etc/amazon/ssm/seelog.xml
+COPY kernel_lc_config.sh .
 
 RUN sm-setup-ssh configure && \
     sm-ssh-ide configure --ssh-only && \

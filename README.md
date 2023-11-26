@@ -17,6 +17,19 @@ Each subsection is going to include the stacks needed to be deployed in order to
 
 ## Sagemaker Remote Developement using SSH/SSM
 
+Things you will need for this demo to work
+
+-   AWS CLI v2 installed: Install or update latest version of
+    [aws cli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+-   AWS CLI session manager plugin: Install
+    [session manager plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
+-   AWS account with Sagemaker Studio properly setup (domain, roles, permissions, endpoints)
+-   AWS Systems Manager:
+    [Advanced-instances tier turned on](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-managedinstances-advanced.html)
+-   VS Code with
+    [Remote-SSH extension installed](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh)
+-   Remote.SSH: Local Server Download setting in VS Code set to auto or always
+
 ### Deploying the Cloudformation Stacks
 
 Total cost of infra per day ($6 per day in us-east-1 as of 25/11/2023)
@@ -39,7 +52,7 @@ so we can use it as a custom image in Sagemaker Studio
 
 ### Some Follow-up Actions once stacks are deployed
 
-1. Enabling setSourceIdentity for the Sagemaker Studio Domain
+#### (Optional) Enabling setSourceIdentity for the Sagemaker Studio Domain
 
 A good setting to enable for the Sagemaker Studio Domain is
 [setSourceIdentity](https://docs.aws.amazon.com/sagemaker/latest/dg/monitor-user-access.html). This will enable you to
@@ -53,15 +66,25 @@ cli (you could also make a lamdba or some more automated process as well)
 
 `aws sagemaker update-domain --domain-id [DOMAIN_ID] --domain-settings-for-update "ExecutionRoleIdentityConfig=USER_PROFILE_NAME" --profile [PROFILE_NAME] --region [REGION]`
 
-2. Building and pushing a custom image with `sagemaker-ssh-helper` package installed.
+#### Building and Creating a Sagemaker Custom Image with `sagemaker-ssh-helper` package installed.
 
-`custom_images/aws-linux-base` contains a Dockerfile that builds a relatively slim container based on
-`amazonlinux:2023`. We can create a custom image that can be selected inside Sagemaker Studio using this.
+There are two ways you can do this:
 
-You will need to have the `EcrRepo` stack deployed (or create one via console) for the `build_tag_push.sh` script to
-work
+-   Via the shell script `custom_images/python-base/build_tag_push_image.sh`
+-   via the console.
 
-3. Creating a Sagemaker Custom Image
+Either way, you will need to have the `EcrRepo` stack deployed to create a private ECR repo (or create one via console)
+
+##### Via the shell script
+
+`custom_images/python-base` contains a Dockerfile that builds a relatively slim container based on `python:3.11.1`. We
+can create a custom image that can be selected inside Sagemaker Studio using this.
+
+If you elect to use `build_tag_push_image.sh` then it should be as simple as ensuring it has execution privs and running
+`./build_tag_push_image.sh --profile <profile_name>`. This will deploy the image to ECR and create and attach the custom
+image to your Studio Domain.
+
+##### Via the console
 
 **NOTE** In order for the custom image to show up in the list of images in Studio we must add it to the environment
 settings for the domain prior to starting Studio or while it is shut down
@@ -70,7 +93,7 @@ Once we have our image in the ECR repo for the account we can create a Sagemaker
 
 Navigate to the `Images` tab in the left ribbon of Sagemaker Console UI
 
-![Custom Image UI](assets/custom-image-console-ui.png 'Custom Image UI')
+![Custom Image UI](assets/custom-image-ui.png 'Custom Image UI')
 
 Click on create Image and then paste in the ECR image URI for the image we pushed previously.
 
@@ -97,7 +120,7 @@ Click on `Attach Image` and select `Existing Image`. You should see your image h
 Hitting next will bring up the familiar `Image Properties` config options and use the same as we did above for UID/GUID
 etc
 
-4. Adding a Sagemaker User
+#### Adding a Sagemaker User
 
 Now that we have attached our custom image to the domain we can create a user.
 
@@ -106,3 +129,59 @@ user what you would like (take note of this it will be needed later) and just en
 selected.
 
 We don't need to use any of the optional settings (such as enabling canvas) for the user.
+
+#### Starting Studio and Creating a Notebook with our custom Image
+
+Once you have successfully launch Sagemaker Studio you will be brought to the home screen.
+
+Here we will launch a notebook (which will spin up an entirely new instance for us) and during this process we can
+select our custom image as the one to use.
+
+There are a couple of ways to launch a notebook, but once you have done it, a dialogue box with some options should
+open.
+
+![Creating Notebook](assets/creating-notebook.png 'Creating Notebook')
+
+You should see an option under custom images. Select that and also the instance size you would like. `ml.t3.medium` is
+more than adequate for demo purposes
+
+While what is spinning up we can upload the shell script we need to execute on the notebook in order to start ssm agent,
+register the notebook with Systems Manager and ensure it is configured for us to remote into.
+
+`kernel_lc_config.sh` contains the code we need to upload and this can be done simply by clicking on the upload icon in
+Sagemaker Studio and selecting this file (assuming you have downloaded it or cloned the repo locally)
+
+![Upload File](assets/upload-file.png 'Upload File')
+
+Once uploaded you can create a notebook terminal, ensure that you have execution permissions on the file
+`chmod u+x kernel_lc_config.sh` and then run it with `./kernel_lc_config.sh`.
+
+Assuming this executes successfully you should see a new registered instance in Systems Manager.
+
+Reminder: you must have Advanced Instance Tier settings enabled for this to work. You can see I have one registered
+instance in the instance below
+
+![Advanced Tier Settings](assets/advanced-tier-settings.png 'Advanced Tier Settings')
+
+#### Using local VS Code Client to connect to Sagemaker Studio
+
+Everything is ready for us to remote into our Sagemaker Studio instance at this point and we just need to do some final
+configuration locally
+
+-   Ensure you have `pip install sagemaker-ssh-helper` into you local python environment
+-   Run `sm-local-configure` which will prompt you for a password
+-   Run `sm-local-ssh-ide set-domain-id [domain_id]` - set with the id for your studio domain
+-   Run `sm-local-ssh-ide set-user-profile-name [user_profile_name]` - set with user profile name of sagemaker user
+-   Run `sm-local-ssh-ide connect [kernel_gateway_app_name]` - kgw app name can be found in your user details tab
+
+![Kernel Gateway App Name](assets/kgw-app.png 'Kernel Gateway App Name')
+
+If that is all successful you should get access to a remote terminal
+
+![Remote Terminal](assets/remote-terminal.png 'Remote Terminal')
+
+**Note**: you will need to leave this connection open in order for you to use the VS Code Remote extension
+
+Finally, we are ready to remote into our instance and get ta hackin.
+
+![VsCode Remote](assets/myvideo.gif 'VsCode Remote')
