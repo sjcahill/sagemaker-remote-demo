@@ -185,3 +185,20 @@ If that is all successful you should get access to a remote terminal
 Finally, we are ready to remote into our instance and get ta hackin.
 
 ![VsCode Remote](assets/myvideo.gif 'VsCode Remote')
+
+### Tearing Down Infra for Sagemaker Remote Demo
+
+1. Ensure all apps for your sagemaker user are deleted.
+2. Delete your sagemaker user
+3. Delete the Sagemaker Stack
+4. Delete the SagemakerRole Stack
+
+Deleting the network stack is the most complicated part
+
+5. Delete the EFS volumes sagemaker created (hopefully you just have 1 from the demo so it is easy to ID)
+6. Find the inbound and outbound SG for nfs associated with your sagemaker VPC
+    - Delete the rules for these SGs
+    - Delete the SGs themselves
+    - There should be one SG left for the interface endpoints (don't have to delete this)
+7. Delete the Network stack
+8. Delete your ECR stack if you created it
