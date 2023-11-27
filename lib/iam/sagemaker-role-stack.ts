@@ -6,7 +6,6 @@ import {
     PolicyStatement,
     Role,
     ServicePrincipal,
-    PolicyDocument,
 } from 'aws-cdk-lib/aws-iam';
 import { Aws, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
@@ -22,7 +21,7 @@ export class SagemakerRoleStack extends Stack {
                 new ServicePrincipal('sagemaker.amazonaws.com'),
                 new ServicePrincipal('ssm.amazonaws.com'),
                 new FederatedPrincipal(
-                    'arn:aws:iam::YOUR_ACCOUNT_ID:saml-provider/GoogleWorkspace',
+                    `arn:aws:iam::${Aws.ACCOUNT_ID}}:saml-provider/GoogleWorkspace`,
                     {
                         StringEquals: {
                             'SAML:aud': 'https://signin.aws.amazon.com/saml',
@@ -50,15 +49,7 @@ export class SagemakerRoleStack extends Stack {
         defaultSagemakerRole.addToPolicy(
             new PolicyStatement({
                 effect: Effect.ALLOW,
-                actions: ['ssm:*'],
-                resources: ['*'],
-            }),
-        );
-
-        defaultSagemakerRole.addToPolicy(
-            new PolicyStatement({
-                effect: Effect.ALLOW,
-                actions: ['s3:*'],
+                actions: ['s3:*', 'codecommit:*'],
                 resources: ['*'],
             }),
         );
