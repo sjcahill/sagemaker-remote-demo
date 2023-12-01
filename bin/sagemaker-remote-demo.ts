@@ -34,7 +34,6 @@ const networkProps = {
 const networkStack = new NetworkStack(app, 'NetworkStack', networkProps);
 const vpc = networkStack.vpc;
 
-const developerRoleStack = new DeveloperRoleStack(app, 'DeveloperRoleStack', stackProps);
 const ecrStack = new EcrStack(app, 'EcrStack', stackProps);
 const sagemakerRoleStack = new SagemakerRoleStack(app, 'SagemakerRoleStack', stackProps);
 const sagemakerStack = new SagemakerStack(app, 'SagemakerStack', { ...stackProps, vpc });
