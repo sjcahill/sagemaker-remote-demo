@@ -13,8 +13,6 @@ I will try to be as clear as possible which stacks will need to be deployed for 
 steps on how to properly tear down any setup infrastructure - since deleting VPCs with many endpoints and security
 groups is not always as straightforward as you would like.
 
-Each subsection is going to include the stacks needed to be deployed in order to complete the demo.
-
 ## Sagemaker Remote Developement using SSH/SSM
 
 Things you will need for this demo to work
@@ -36,37 +34,48 @@ Total cost of infra per day ($6 per day in us-east-1 as of 25/11/2023)
 
 Stacks defined as part of the cdk app here: `bin/sagemaker-remote-demo.ts`
 
-Any stacks prefixed by a `*` are able to be optional depending on your setup. Explanations for under what conditions and
-why this is the case will be below the stack order. Stacks needed to be deployed (in order)
+Any stacks followed by an `*` are able to be optional depending on your setup. Explanations for under what conditions
+and why this is the case will be below the stack order. Stacks needed to be deployed (in order)
 
 -   `NetworkStack` (look in the README at `lib/network` to see what will be created)
 -   `SagemakerRoleStack` (defines the sagemaker execution role and client ssh inline IAM policy)
 -   `SagemakerStack` (defines the sagemaker studio domain settings)
--   `*` `EcrStack` (enables the creation of a custom image)
+-   `EcrStack` `*` (enables the creation of a custom image)
 
 **Note**: The `EcrStack` is only needed if you want to create and use a custom image to run a Sagemaker Studio Notebook.
+We have to do this because we lack external interet connectivity in the VPC setup. Therefore we cannot pip install
+packages and must ensure that we have an image that includes all its dependencies
 
-The reason we have to do this is we have no external internet access enabled in the VPC and for Studio. Since we have no
-proxy for `PyPI` setup we will need to `pip install` a necessary package locally and then push the image to our ECR repo
-so we can use it as a custom image in Sagemaker Studio
+If you are unfamiliar with cdk projects here are the steps you will likely need to take to get started (assuming you
+have cloned the repo and navigated to the directory in your terminal):
 
-### Some Follow-up Actions once stacks are deployed
+-   [Bootstrap your AWS account for CDK](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
+-   `npm install`
+-   `npm run build`
+-   `cdk list`
 
-#### (Optional) Enabling setSourceIdentity for the Sagemaker Studio Domain
+The last command should show you the stacks that are currently able to be deployed as part of your cdk app
+
+To deploy a stack I generally skip the synth step and do:
+
+-   `npx cdk diff --profile <profile_name> <stack_name>` to see the changes
+-   `npx cdk deploy --profile <profile_name> <stack_name>` to deploy the stack
+
+### (Optional) Enabling setSourceIdentity for the Sagemaker Studio Domain
 
 A good setting to enable for the Sagemaker Studio Domain is
 [setSourceIdentity](https://docs.aws.amazon.com/sagemaker/latest/dg/monitor-user-access.html). This will enable you to
 log actions taken in Sagemaker at the user level **provided that the user-profile tag is unique for each user**
 
-By default the actions get logged at the execution role level and since it is common to have multiple users per
+By default, the actions get logged at the execution role level and since it is common to have multiple users per
 execution role this might not be granular enough for your purposes.
 
-Unfortunately this setting is not available in the `cdk` Domain construct for Sagemaker and so must be set manually via
+Unfortunately, this setting is not available in the `cdk` Domain construct for Sagemaker and so must be set manually via
 cli (you could also make a lamdba or some more automated process as well)
 
 `aws sagemaker update-domain --domain-id [DOMAIN_ID] --domain-settings-for-update "ExecutionRoleIdentityConfig=USER_PROFILE_NAME" --profile [PROFILE_NAME] --region [REGION]`
 
-#### Building and Creating a Sagemaker Custom Image with `sagemaker-ssh-helper` package installed.
+### Building and Creating a Sagemaker Custom Image with `sagemaker-ssh-helper` package installed.
 
 There are two ways you can do this:
 
@@ -75,16 +84,16 @@ There are two ways you can do this:
 
 Either way, you will need to have the `EcrRepo` stack deployed to create a private ECR repo (or create one via console)
 
-##### Via the shell script
+#### Via the shell script
 
-`custom_images/python-base` contains a Dockerfile that builds a relatively slim container based on `python:3.11.1`. We
-can create a custom image that can be selected inside Sagemaker Studio using this.
+`custom_images/python-base` contains a Dockerfile that builds a relatively slim container based on `python:3.11.1`.
 
 If you elect to use `build_tag_push_image.sh` then it should be as simple as ensuring it has execution privs and running
-`./build_tag_push_image.sh --profile <profile_name>`. This will deploy the image to ECR and create and attach the custom
-image to your Studio Domain.
+`./build_tag_push_image.sh --profile <profile_name>`.
 
-##### Via the console
+This will deploy the image to ECR and create and attach the custom image to your Studio Domain.
+
+#### Via the console
 
 **NOTE** In order for the custom image to show up in the list of images in Studio we must add it to the environment
 settings for the domain prior to starting Studio or while it is shut down
@@ -120,7 +129,7 @@ Click on `Attach Image` and select `Existing Image`. You should see your image h
 Hitting next will bring up the familiar `Image Properties` config options and use the same as we did above for UID/GUID
 etc
 
-#### Adding a Sagemaker User
+### Adding a Sagemaker User
 
 Now that we have attached our custom image to the domain we can create a user.
 
@@ -130,7 +139,7 @@ selected.
 
 We don't need to use any of the optional settings (such as enabling canvas) for the user.
 
-#### Starting Studio and Creating a Notebook with our custom Image
+### Starting Studio and Creating a Notebook with our custom Image
 
 Once you have successfully launch Sagemaker Studio you will be brought to the home screen.
 
@@ -163,7 +172,7 @@ instance in the instance below
 
 ![Advanced Tier Settings](assets/advanced-tier-settings.png 'Advanced Tier Settings')
 
-#### Using local VS Code Client to connect to Sagemaker Studio
+### Using local VS Code Client to connect to Sagemaker Studio
 
 Everything is ready for us to remote into our Sagemaker Studio instance at this point and we just need to do some final
 configuration locally
@@ -202,3 +211,5 @@ Deleting the network stack is the most complicated part
     - There should be one SG left for the interface endpoints (don't have to delete this)
 7. Delete the Network stack
 8. Delete your ECR stack if you created it
+
+## Sagemaker Lifecycle Configs using Custom Resources
