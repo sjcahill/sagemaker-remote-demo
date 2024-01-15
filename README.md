@@ -3,6 +3,8 @@
 This repository is meant to assist those interested in using VSCode Remote developement to ssh into Sagemaker Studio
 Notebook instances.
 
+This demo uses the `sagemaker ssh helper` library located at: https://github.com/aws-samples/sagemaker-ssh-helper
+
 It contains the [AWS CDK](https://aws.amazon.com/cdk/) code for building out the necessary infrastructure in order to
 use the demo.
 
@@ -211,3 +213,5 @@ Deleting the network stack is the most complicated part
     - There should be one SG left for the interface endpoints (don't have to delete this)
 7. Delete the Network stack
 8. Delete your ECR stack if you created it
+
+## Sagemaker Lifecycle Configs using Custom Resources
