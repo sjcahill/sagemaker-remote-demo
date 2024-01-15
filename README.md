@@ -211,5 +211,3 @@ Deleting the network stack is the most complicated part
     - There should be one SG left for the interface endpoints (don't have to delete this)
 7. Delete the Network stack
 8. Delete your ECR stack if you created it
-
-## Sagemaker Lifecycle Configs using Custom Resources
