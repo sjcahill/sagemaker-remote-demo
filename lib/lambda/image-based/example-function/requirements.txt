@@ -1,0 +1,4 @@
+--extra-index-url <url_to_proxy>
+
+pandas>2.0.0
+
