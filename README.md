@@ -1,3 +1,13 @@
+# Bootstrapping CDK projects
+
+To bootstrap an AWS account using cdk use this command:
+
+`npx cdk bootstrap aws://ACCOUNT-NUMBER/REGION --profile ADMIN-PROFILE \ --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess`
+
+To bootstrap an AWS account that can be deployed via a CDK pipeline in another account use this:
+
+`npx cdk bootstrap aws://ACCOUNT-NUMBER/REGION --profile ADMIN-PROFILE \ --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess \ --trust PIPELINE-ACCOUNT-NUMBER`
+
 # Sagemaker Remote Demo
 
 This repository is meant to assist those interested in using VSCode Remote developement to ssh into Sagemaker Studio
